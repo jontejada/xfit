@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "delay": "^4.1.0",
     "puppeteer": "^1.11.0"
   },
   "devDependencies": {},
