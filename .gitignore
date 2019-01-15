@@ -1,3 +1,5 @@
 node_modules
 credentials.json
 *.png
+notes.md
+.DS_Store
