@@ -1,3 +1,7 @@
+//    "delay": "^4.1.0",
+//    "puppeteer": "^1.11.0"
+
+
 const puppeteer = require('puppeteer');
 const delay = require('delay');
 const cred = require('./credentials.json');
