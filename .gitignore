@@ -3,3 +3,4 @@ credentials.json
 *.png
 notes.md
 .DS_Store
+dist
