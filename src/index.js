@@ -66,7 +66,10 @@ class App extends Component {
 			<div className="App">
 			{this.state.data.map((workoutData, i) => {
 				let workoutEl;
-				if (workoutData.RecordList) {
+				if (
+					workoutData.RecordList &&
+					Array.isArray(workoutData.RecordList.APIWod.Components.Component)
+				) {
 					workoutEl =
 					<div className="workoutEntry" key={i}>
 					<h2>{workoutData.RecordList.APIWod.WodHeader.Name}</h2>
