@@ -1,24 +1,33 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import DOMPurify from 'dompurify';
 import './style.css';
+
+const DAY = 'day';
+const WORKOUT = 'workout';
+const CONDITIONING = 'conditioning';
+const PERFORMANCE = 'performance';
+const STRENGTH = 'strength';
+const PEAK = 'peak';
 
 const getWorkouts = () => {
 	const urlFragment0 = 'https://app.wodify.com/API/WODs_v1.aspx?apiKey=274jjw066romuea8bxp0a0rew&date=';
-	const urlFragment1 = '&type=json&location=Flagship+Upper+Market&program=F+%7C+';
+	const urlFragment1 = '&type=json&location=Flagship+Upper+Market&program=';
 
 	const prog = {
-		cond: 'Conditioning',
-		perf: 'Performance',
-		stre: 'Strength+Development',
+		[CONDITIONING]: 'F+%7C+Conditioning',
+		[PERFORMANCE]: 'F+%7C+Performance',
+		[STRENGTH]: 'F+%7C+Strength+Development',
+		[PEAK]: '+Peak'
 	}
 	const classDays = [
-	[ prog.cond, prog.perf ],
-	[ prog.cond, prog.perf, prog.stre ],
-	[ prog.cond, prog.perf, prog.stre ],
-	[ prog.cond, prog.perf, prog.stre ],
-	[ prog.cond, prog.perf, prog.stre ],
-	[ prog.perf ],
-	[ prog.cond, prog.perf ]
+		[ CONDITIONING, PERFORMANCE, PEAK ], // sun
+		[ CONDITIONING, PERFORMANCE, PEAK, STRENGTH ], // mon
+		[ CONDITIONING, PERFORMANCE, PEAK, STRENGTH ], // tues
+		[ CONDITIONING, PERFORMANCE, PEAK, STRENGTH ], // wed
+		[ CONDITIONING, PERFORMANCE, PEAK, STRENGTH ], // thurs
+		[ PERFORMANCE, PEAK ], // fri
+		[ CONDITIONING, PERFORMANCE, PEAK ], // sat
 	];
 
 	const today = new Date();
@@ -33,10 +42,14 @@ const getWorkouts = () => {
 	const promises = [];
 
 	const workoutsForDay = (day) => {
-		promises.push({ dayOfWeek: day.getDay() });
+		promises.push({
+			type: DAY,
+			value: day.getDay()
+		});
 		const classList = classDays[day.getDay()];
 		classList.forEach((classString) => {
-			const fetchClass = fetch(`${urlFragment0}${day.getFullYear()}-${day.getMonth() + 1}-${day.getDate()}${urlFragment1}${classString}`).then(res => res.json());
+			const fetchClass = fetch(`${urlFragment0}${day.getFullYear()}-${day.getMonth() + 1}-${day.getDate()}${urlFragment1}${prog[classString]}`)
+				.then(res => Promise.all([classString, res.json()]));
 			promises.push(fetchClass);
 		});
 	};
@@ -46,6 +59,30 @@ const getWorkouts = () => {
 	});
 
 	return Promise.all(promises);
+};
+
+const cleanWorkoutData = (data) => {
+	const cleanedData = [];
+	for (let i = 0; i < data.length; i++) {
+		const entry = data[i];
+		if (entry.type === DAY) {
+			cleanedData.push({
+				type: entry.type,
+				value: ['sun', 'mon', 'tues', 'wed', 'thurs', 'fri', 'sat 🌞'][entry.value] 
+			});
+		} else {
+			if (entry[1].APIError) continue;
+			if (entry[1].RecordList && entry[1].RecordList.APIWod) {
+				cleanedData.push({
+					type: WORKOUT,
+					label: entry[0],
+					value: DOMPurify.sanitize(entry[1].RecordList.APIWod.FormattedWOD)
+				});
+			}
+		}
+	}
+
+	return cleanedData;
 };
 
 class App extends Component {
@@ -58,34 +95,36 @@ class App extends Component {
 	}
 
 	componentDidMount() {
-		getWorkouts().then(data => this.setState({ data }));
+		getWorkouts().then(data => this.setState({ data: cleanWorkoutData(data) }));
+		return;
+		// sessionStorage for testing w/o blasting the endpoint
+		const saved = sessionStorage.getItem('xfit');
+		if (saved) {
+			this.setState({ data: JSON.parse(saved) });
+		} else {
+			getWorkouts().then(data => {
+				const saveMe = cleanWorkoutData(data);
+				sessionStorage.setItem('xfit', JSON.stringify(saveMe));
+				this.setState({ data: saveMe });
+			});
+
+		}
 	}
 
 	render() {
 		return (
 			<div className="App">
-			{this.state.data.map((workoutData, i) => {
-				let workoutEl;
-				if (
-					workoutData.RecordList &&
-					Array.isArray(workoutData.RecordList.APIWod.Components.Component)
-				) {
-					workoutEl =
-					<div className="workoutEntry" key={i}>
-					<h2>{workoutData.RecordList.APIWod.WodHeader.Name}</h2>
-					{workoutData.RecordList.APIWod.Components.Component.map((comp, j) => {
-						return <span key={j}>
-						<h3>{comp.Name}</h3>
-						<p>{comp.Description}</p>
-						<p>{comp.Comments}</p>
-						</span>;
-					})}
-					<hr/>
-					</div>;
-				} else if (workoutData.dayOfWeek) {
-					workoutEl = <h1 key={i}>{['sun', 'mon', 'tues', 'wed', 'thurs', 'fri', 'sat'][workoutData.dayOfWeek]}</h1>
+			{this.state.data.map((cleanEntry, i) => {
+				let el;
+				if (cleanEntry.type === DAY) {
+					el = <h1 key={i}>{cleanEntry.value}</h1>;
+				} else if (cleanEntry.type === WORKOUT) {
+					el = <span key={i}>
+						<h2>{cleanEntry.label}</h2>
+						<span dangerouslySetInnerHTML={{ __html: cleanEntry.value }}></span>
+					</span>;
 				}
-				return workoutEl;
+				return el;
 			})}
 			<header className="App-header">
 			<a
@@ -106,5 +145,3 @@ ReactDOM.render(
 	<App/>,
 	document.getElementById('app')
 	);
-
-// module.hot.accept();
