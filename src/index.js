@@ -16,18 +16,18 @@ const getWorkouts = () => {
 
 	const prog = {
 		[CONDITIONING]: 'F+%7C+Conditioning',
-		[PERFORMANCE]: 'F+%7C+Performance',
+		// [PERFORMANCE]: 'F+%7C+Performance',
 		[STRENGTH]: 'F+%7C+Strength+Development',
 		[PEAK]: '+Peak'
 	}
 	const classDays = [
-		[ CONDITIONING, PERFORMANCE, PEAK ], // sun
-		[ CONDITIONING, PERFORMANCE, PEAK, STRENGTH ], // mon
-		[ CONDITIONING, PERFORMANCE, PEAK, STRENGTH ], // tues
-		[ CONDITIONING, PERFORMANCE, PEAK, STRENGTH ], // wed
-		[ CONDITIONING, PERFORMANCE, PEAK, STRENGTH ], // thurs
-		[ PERFORMANCE, PEAK ], // fri
-		[ CONDITIONING, PERFORMANCE, PEAK ], // sat
+		[ CONDITIONING, PEAK ], // sun
+		[ CONDITIONING, PEAK, STRENGTH ], // mon
+		[ CONDITIONING, PEAK, STRENGTH ], // tues
+		[ CONDITIONING, PEAK, STRENGTH ], // wed
+		[ CONDITIONING, PEAK, STRENGTH ], // thurs
+		[ PEAK ], // fri
+		[ CONDITIONING, PEAK ], // sat
 	];
 
 	const today = new Date();
@@ -114,30 +114,20 @@ class App extends Component {
 	render() {
 		return (
 			<div className="App">
-			{this.state.data.map((cleanEntry, i) => {
-				let el;
-				if (cleanEntry.type === DAY) {
-					el = <h1 key={i}>{cleanEntry.value}</h1>;
-				} else if (cleanEntry.type === WORKOUT) {
-					el = <span key={i}>
-						<h2>{cleanEntry.label}</h2>
-						<span dangerouslySetInnerHTML={{ __html: cleanEntry.value }}></span>
-					</span>;
-				}
-				return el;
-			})}
-			<header className="App-header">
-			<a
-			className="App-link"
-			href="https://app.wodify.com/Schedule/CalendarListViewEntry.aspx"
-			target="_blank"
-			rel="noopener noreferrer"
-			>
-			wodify calendar
-			</a>
-			</header>
+				{this.state.data.map((cleanEntry, i) => {
+					let el;
+					if (cleanEntry.type === DAY) {
+						el = <h1 key={i}>{cleanEntry.value}</h1>;
+					} else if (cleanEntry.type === WORKOUT) {
+						el = <span key={i}>
+							<h2>{cleanEntry.label}</h2>
+							<span dangerouslySetInnerHTML={{ __html: cleanEntry.value }}></span>
+						</span>;
+					}
+					return el;
+				})}
 			</div>
-			);
+		);
 	}
 }
 
