@@ -15,9 +15,8 @@ const getWorkouts = () => {
 	const urlFragment1 = '&type=json&location=Flagship+Upper+Market&program=';
 
 	const prog = {
-		[CONDITIONING]: 'F+%7C+Conditioning',
-		// [PERFORMANCE]: 'F+%7C+Performance',
-		[STRENGTH]: 'F+%7C+Strength+Development',
+		[CONDITIONING]: '+Conditioning',
+		[STRENGTH]: 'Strength',
 		[PEAK]: '+Peak'
 	}
 	const classDays = [
