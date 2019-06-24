@@ -7,7 +7,7 @@ class App extends Component {
 	constructor(props) {
 		super(props);
 
-		this.dayNames = ['mon', 'tues', 'wed', 'thurs', 'fri', 'sat 🌞', 'sun'];
+		this.dayNames = ['sun', 'mon', 'tues', 'wed', 'thurs', 'fri', 'sat 🌞'];
 
 		const today = new Date();
 		this.days = [];
@@ -87,21 +87,24 @@ class App extends Component {
 
 	render() {
 		return (
-			<div className="App">
+			<div className="week">
 				{this.days.map((day) => {
 					const dayIndex = day.getDay();
 					const dayName = this.dayNames[dayIndex];
 					const daysWorkouts = this.state[dayIndex];
 					return (!!daysWorkouts.length &&
-						<div key={dayIndex}>
+						<div className="day" key={dayIndex}>
 							<h1>{dayName}</h1>
 							<ol>
 								{this.state[dayIndex].map((workout, i) => {
 									return (
-										<span key={workout.label + i}>
+										<li key={workout.label + i}>
 											<h2>{workout.label}</h2>
-											<span dangerouslySetInnerHTML={{ __html: workout.cleanHtml }}></span>
-										</span>
+											<div
+												className="content"
+												dangerouslySetInnerHTML={{ __html: workout.cleanHtml }}
+											></div>
+										</li>
 									);
 								})}
 							</ol>
